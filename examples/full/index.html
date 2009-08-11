@@ -70,7 +70,9 @@ $(document).ready(function() {
 				setTimeout('window.location = "success.html";',2000);
 			} else if(data == "false") {
 				$("input,select,textarea").removeAttr("disabled");
-				$("img[src='lock.png']").attr("src","lock_open.png");
+				$.each($("img[src*='lock.png']"),function(i,item) {
+					$(this).attr("src","lock_open.png");
+				});
 				$("#Email").closest("td").append("<span id='error'><img src='cancel.png' /> enter a vaild email address</span>");
 				$("#status").hide();
 			}
