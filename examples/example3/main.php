@@ -33,6 +33,9 @@ html,body {
 <p><strong>orignial POST:</strong> <br/><?php print_r($_POST); ?></p>
 <?php
 $var = $jCryption->decrypt($_POST['jCryption'], $_SESSION["d"]["int"], $_SESSION["n"]["int"]);
+unset($_SESSION["e"]);
+unset($_SESSION["d"]);
+unset($_SESSION["n"]);
 parse_str($var,$result);
 ?>
 

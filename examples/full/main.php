@@ -14,6 +14,9 @@ if(isset($_GET["generateKeypair"])) {
 	echo '{"e":"'.$_SESSION["e"]["hex"].'","n":"'.$_SESSION["n"]["hex"].'","maxdigits":"'.intval($keyLength*2/16+3).'"}';
 } else {
 	$var = $jCryption->decrypt($_POST['jCryption'], $_SESSION["d"]["int"], $_SESSION["n"]["int"]);
+	unset($_SESSION["e"]);
+	unset($_SESSION["d"]);
+	unset($_SESSION["n"]);
 	parse_str($var,$result);
 	
 	if (preg_match('/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b/i', $result["Email"])) {

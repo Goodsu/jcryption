@@ -19,7 +19,7 @@
  * @author     Daniel Griesser <daniel.griesser@jcryption.org>
  * @copyright  2009 Daniel Griesser
  * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
- * @version    1.0
+ * @version    1.0.1
  * @link       http://jcryption.org/
  */
 class jCryption {
@@ -324,6 +324,16 @@ class jCryption {
 		// $num is strong pseudoprime
 		return true;
 	}
+	
+	/**
+     * Produces a better random number
+	 * for seeding mt_rand()
+     *
+     * @access private
+     */
+	function _makeSeed() {
+		return hexdec(sha1(sha1(microtime()*mt_rand()).md5(microtime()*mt_rand())));
+	}
 
 	/**
      * Generates prime number with length $bits_cnt
@@ -336,8 +346,9 @@ class jCryption {
 		$bits_n = $bits_cnt % 8;
 		do {
 			$str = '';
+			mt_srand($this->_makeSeed());
 			for ($i = 0; $i < $bytes_n; $i++) {
-				$str .= chr(mt_rand() * microtime() & 0xff);
+				$str .= chr(sha1(mt_rand() * microtime()) & 0xff);
 			}
 			$n = mt_rand() * microtime() & 0xff;
 
