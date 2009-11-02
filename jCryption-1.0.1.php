@@ -25,14 +25,15 @@
 class jCryption {
 	
 	var $_key_len;
+	var $_e;
 
 	/**
      * Constructor
      *
      * @access public
      */
-	function jCryption() {
-		
+	function jCryption($e = "\x01\x00\x01") {
+		$this->_e = $e;
 	}
 	
 	/**
@@ -50,7 +51,7 @@ class jCryption {
 		}
 
 		// set [e] to 0x10001 (65537)
-		$e = $this->bin2int("\x01\x00\x01");
+		$e = $this->bin2int($this->_e);
 
 		// generate [p], [q] and [n]
 		$p_len = intval(($this->_key_len + 1) / 2);
@@ -71,9 +72,56 @@ class jCryption {
 
 			do {
 				$q = $this->getPrime($q_len);
+				//$q = 102238965184417281201422828818276460200050705922822343263269460146519295919831;
 				$q1 = $this->dec($q);
 				$tmp = $this->GCD($e, $q1);
 			} while (!$this->isOne($tmp) && !$this->cmpAbs($q, $p));
+
+			// if (p < q), then exchange them
+			if ($this->cmpAbs($p, $q) < 0) {
+				$tmp = $p;
+				$p = $q;
+				$q = $tmp;
+				$tmp = $p1;
+				$p1 = $q1;
+				$q1 = $tmp;
+			}
+			// calculate n = p * q
+			$n = $this->mul($p, $q);
+
+		} while ($this->bitLen($n) != $this->_key_len);
+
+		// calculate d = 1/e mod (p - 1) * (q - 1)
+		$pq = $this->mul($p1, $q1);
+		$d = $this->invmod($e, $pq);
+
+		// store RSA keypair attributes
+		$keypair = array('n'=>$n, 'e'=>$e, 'd'=>$d, 'p'=>$p, 'q'=>$q);
+
+		return $keypair;
+	}
+	
+	function useKeys($keys,$keyLength) {
+		$this->_key_len = intval($keyLength);
+		if ($this->_key_len < 8) {
+			$this->_key_len = 8;
+		}
+
+		// set [e] to 0x10001 (65537)
+		$e = $this->bin2int($this->_e);
+
+		// generate [p], [q] and [n]
+		$p_len = intval(($this->_key_len + 1) / 2);
+		$q_len = $this->_key_len - $p_len;
+		$p1 = $q1 = 0;
+		do {
+			do {
+				$q = $keys[rand(0,count($keys))];
+				$p = $keys[rand(0,count($keys))];
+				$p1 = $this->dec($p);
+				$q1 = $this->dec($q);
+			} while (!$this->cmpAbs($q, $p));
+
 
 			// if (p < q), then exchange them
 			if ($this->cmpAbs($p, $q) < 0) {
@@ -628,6 +676,28 @@ class jCryption {
 		} while ($decimal > 0);
 
 		return strtolower($string);
+	}
+	
+	function getE() {
+		return $this->_e;
+	}
+	
+	function generatePrime($length) {
+		$this->_key_len = intval($length);
+		if ($this->_key_len < 8) {
+			$this->_key_len = 8;
+		}
+		
+		$e = $this->bin2int("\x01\x00\x01");
+
+		$p_len = intval(($this->_key_len + 1) / 2);
+		do {
+				$p = $this->getPrime($p_len);
+				$p1 = $this->dec($p);
+				$tmp = $this->GCD($e, $p1);
+		} while (!$this->isOne($tmp));
+		
+		return $p;
 	}
 
 }
