@@ -1,29 +1,28 @@
-<?php
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Generating Prime</title>
 
-require_once("../../jCryption-1.0.1.php");
-$keyLength = 128;
-$jCryption = new jCryption();
+<script type="text/javascript" src="../../jquery-1.3.2.min.js"></script>
+<script type="text/javascript">
+var times = <? echo intval($_GET["times"]); ?>;
+var i = 0;
+$(function() {
+	function generatePrime() {
+		if(i <= times) {
+			$.get("generate.php?keylength=<? echo intval($_GET["keylength"]); ?>",function(data) {
+				generatePrime();
+			});
+			i++;
+		}
+	}
+	generatePrime();
+});
+</script>
+</head>
 
-$primeCacheFile = md5($keyLength.$jCryption->getE());
-$fp = fopen($primeCacheFile, 'a+') or die("can't open file");
+<body>
 
-$stringData = '"'.$jCryption->generatePrime($keyLength).'",';
-fwrite($fp, $stringData);
-
-fclose($fp);
-
-/*
-$foo = array(get_include_contents('256.php'));
-
-function get_include_contents($filename) {
-    if (is_file($filename)) {
-        ob_start();
-        include $filename;
-        $contents = ob_get_contents();
-        ob_end_clean();
-        return $contents;
-    }
-    return false;
-}*/
-//echo $jCryption->dec2string($jCryption->generatePrime(256),36);
-?>
+</body>
+</html>
